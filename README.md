@@ -1,72 +1,60 @@
-Create a virtual machine with the ISO, linux max 2.X (max version).
+# snow-crash
+In a provided Linux ISO, perform a series of flag hunts by exploiting various security vulnerabilities.
+This project is an introduction to cyber security.
 
-level00:level00
-Add tcp port forwarding with 4242
+## Useful commands
+- ```find / -user xx -group xx``` search for files owned by a user of group
+- ```ls -la``` list all files in directory with detailed information
+- ```getfacl``` shows the detailed permissions of a file
+- ```ltrace``` shows all dynamic library calls and signals received by a process
+- ```gdb``` is a great tool to analyse or manipulate execution flow
+- ```ssh``` allows us to have several sessions of a machine's terminal running
+- ```scp``` can be used to copy files from and to a virtual machine for inspection
+- ```nc``` listen to TCP and UPD connections
 
-on host: ssh level00@localhost -p 4242
+## Useful programs
+- **VirtualBOX** virtualization tool
+- **Wireshark** network protocol analyzer
+- [online dissassembler](https://onlinedisassembler.com/odaweb/) executable dissassembly and analysis tool
 
-
-We search for flagXX passwords, with flagXX is the username
-
-flag00: Search all files that have the user autorisation
-find / -user flag00 2>/dev/null | grep -v "/proc"
-
-find from root with user, redirects errors to hide them and removing files starting with /proc.
-file has last r when doing the ls -l, so we can read it
-cat file
-Then we do rot of 11 (using online https://www.dcode.fr/rot-cipher
-
-He get nottoohardhere
-
-su flag00
-nottoohardhere
-
-getflag x24ti5gi3x0ol2eh4esiuxias
-```
-flag00@SnowCrash:~$ getflag
-Check flag.Here is your token : x24ti5gi3x0ol2eh4esiuxias
-```
-exit to get back to previous user
-
-
-
-su level01:x24ti5gi3x0ol2eh4esiuxias
-FLAG00 to FLAG01
-checking /etc/passwd file
-https://www.cyberciti.biz/faq/understanding-etcpasswd-file-format/
-
-we can log /etc/passwd
-we get an encrypted password 42hDRfypTqqnw, other users password have an x meaning they are in /etc/shadow
-
-we copy the file locally with scp,
-john passwd
-
-...get the pwd by bruteforce
-https://null-byte.wonderhowto.com/how-to/hack-like-pro-crack-user-passwords-linux-system-0147164/
-
-```
-flag01@SnowCrash:~$ getflag
-Check flag.Here is your token : f2av5il02puano7naaf6adaaf
-```
-
-su level02:f2av5il02puano7naaf6adaa
-
-we have a pcap file, we can decode it
-
-
-
-
-su level03:
-ls -l, we see a flag03 user on the file
-file level03
-we know its executable
-trying nm, strings
-strings show clue
-Now that means if we can replace the file, we can use the user auth,
-cp /bin/getflag ./echo
-export PATH={pwd}:$PATH
-```
-level03@SnowCrash:~$ ./level03
-Check flag.Here is your token : qi0maab88jeaj46qoumi7maus
-```
-
+## Vulnerabilities exploited (see **levelXX/Ressources/** for method)
+### level00
+Mother of all security vulnerabilities, **the user**!  
+His password can be found in a text file that he owns.
+### level01
+An **unprotected system file** contains the password.  
+[etc/passwd format](https://www.cyberciti.biz/faq/understanding-etcpasswd-file-format/)    
+[**John the Ripper** decryption tool](https://www.openwall.com/john/
+)
+### level02
+A network packet snapshot that contains the password can be read with **Wireshark**.
+### level03
+Fake **binary redirection** using environment variables.  
+[exploiting setuid binaries](https://www.riccardoancarani.it/exploting-setuid-setgid-binaries/)
+### level04
+A **CGI perl subroutine with elevated permissions** is running and can receive parameters.   
+[perl and CGI](https://www.tutorialspoint.com/perl/perl_cgi.htm)
+### level05
+Abuse of **wildcard in a cron script** with elevated permissions.  
+[cron jobs](https://www.ostechnix.com/a-beginners-guide-to-cron-jobs/)
+### level06
+Another **wildcard script exploit**, this time with **'e'** regex modifier in a php script.  
+[pattern modifiers in php](https://www.php.net/manual/en/reference.pcre.pattern.modifiers.php)
+### level07
+Weak security based on an **unprotected environment variable**.
+### level08
+**Hardcoded file name check**, easily circumvented with a dynamic link.
+### level09
+Encryption method was too basic and easily reverse engineered.
+### level10
+**access() security hole**
+Swapping files between security check and file open to use script elevated permissions
+### level11
+Running lua task is not protected against **code injection**
+### level12
+**Wildcard in a perl script** with elevated permissions, albeit more formatting is required
+### level13
+Executable with elevated permissions is unprotected against **library injections**
+### level14
+After **dissassembling** an executable we find **unobfuscated strings and functions** that lead us to crucial code. With ```gdb``` we can perform an **jump** and run it.  
+[gdb jumping](https://sourceware.org/gdb/onlinedocs/gdb/Jumping.html)
